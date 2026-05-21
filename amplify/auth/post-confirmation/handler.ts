@@ -1,9 +1,10 @@
 import type { PostConfirmationTriggerHandler } from "aws-lambda";
 import { type Schema } from "../../data/resource";
 import { Amplify } from "aws-amplify";
-import { generateClient } from "aws-amplify/data";
+import { generateClient } from "aws-amplify/api";
 import { env } from "$amplify/env/post-confirmation";
 import { createUserProfile } from "./graphql/mutations";
+
 Amplify.configure(
   {
     API: {
@@ -31,18 +32,25 @@ Amplify.configure(
     },
   }
 );
+
 const client = generateClient<Schema>({
   authMode: "iam",
 });
+
 export const handler: PostConfirmationTriggerHandler = async (event) => {
-  await client.graphql({
-    query: createUserProfile,
-    variables: {
-      input: {
-        email: event.request.userAttributes.email,
-        profileOwner: `${event.request.userAttributes.sub}::${event.userName}`,
+  try {
+    await client.graphql({
+      query: createUserProfile,
+      variables: {
+        input: {
+          email: event.request.userAttributes.email,
+          profileOwner: `${event.request.userAttributes.sub}::${event.userName}`,
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    console.error("Error creating user profile:", error);
+    throw error;
+  }
   return event;
 };
