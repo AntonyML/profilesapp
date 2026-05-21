@@ -19,7 +19,7 @@ const client = generateClient<Schema>({
   authMode: "userPool",
 });
 export default function App() {
-  const [userprofiles, setUserProfiles] = useState([]);
+  const [userprofiles, setUserProfiles] = useState<Array<Schema["UserProfile"]["type"]>>([]);
   const { signOut } = useAuthenticator((context) => [context.user]);
 
   useEffect(() => {
