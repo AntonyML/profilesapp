@@ -7,24 +7,14 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      // Polyfill node:url for browser — aws-amplify internals use fileURLToPath
+      // Polyfill node:url — aws-amplify internals use fileURLToPath
       'node:url': path.resolve(__dirname, 'src/stubs/node-url.ts'),
+      // Stub backend-only packages so they never get bundled for the browser
+      '@aws-amplify/backend': path.resolve(__dirname, 'src/stubs/aws-amplify-backend.ts'),
+      '@aws-amplify/backend-cli': path.resolve(__dirname, 'src/stubs/aws-amplify-backend.ts'),
     },
   },
   optimizeDeps: {
-    exclude: [
-      '@aws-amplify/backend',
-      '@aws-amplify/backend-cli',
-      'aws-cdk-lib',
-      'constructs',
-    ],
-  },
-  build: {
-    rollupOptions: {
-      external: (id: string) =>
-        id.startsWith('@aws-amplify/backend') ||
-        id.startsWith('aws-cdk-lib') ||
-        id === 'constructs',
-    },
+    exclude: ['aws-cdk-lib', 'constructs'],
   },
 })
